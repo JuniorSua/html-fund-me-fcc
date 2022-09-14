@@ -8,11 +8,11 @@ import { abi, contractAddress } from "./constants.js"
 
 const connectButton = document.getElementById("connectButton")
 const fundButton = document.getElementById("fundButton")
-const balancButton = document.getElementById("balanceButton")
+const balanceButton = document.getElementById("balanceButton")
 const withdrawButton = document.getElementById("withdrawButton")
 connectButton.onclick = connect
 fundButton.onclick = fund
-balancButton.onclick = getBalance
+balanceButton.onclick = getBalance
 withdrawButton.onclick = withdraw
 
 console.log(ethers)
@@ -26,6 +26,8 @@ async function connect() {
             console.log(error)
         }
         connectButton.innerHTML = "Connected!"
+        const accounts = await ethereum.request({ method: "eth_accounts" }) //  Returns a list of addresses owned by client.
+        console.log(accounts)
     } else {
         connectButton.innerHTML = "Please install metamask!"
     }
@@ -40,8 +42,8 @@ async function fund() {
         // signer / wallet / someone with some gas
         // contract that we are interacting with
         // ^ ABI & Address
-        const providor = new ethers.providers.Web3Provider(window.ethereum)
-        const signer = providor.getSigner()
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const signer = provider.getSigner()
         const contract = new ethers.Contract(contractAddress, abi, signer)
         try {
             const transactionResponse = await contract.fund({
@@ -59,8 +61,12 @@ async function fund() {
 async function getBalance() {
     if (typeof window.ethereum != "undefined") {
         const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const balance = await provider.getBalance(contractAddress)
-        console.log(ethers.utils.formatEther(balance))
+        try {
+          const balance = await provider.getBalance(contractAddress)
+          console.log(ethers.utils.formatEther(balance))
+        } catch (error) {
+          console.log(error)
+        }
     }
 }
 
